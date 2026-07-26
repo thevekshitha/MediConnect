@@ -9,12 +9,12 @@ An AI-powered healthcare management platform built using Flask that enables pati
 ### 👤 Patient
 - Register & Login
 - Update Profile
-- Upload Medical Records
+- Upload 
+### 👨‍⚕️ DoctorMedical Records
 - Book Doctor Appointments
 - Medicine Reminders
 - AI Symptom Checker
 
-### 👨‍⚕️ Doctor
 - Register & Login
 - Manage Dashboard
 - View Appointments
