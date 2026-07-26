@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}My Profile — MediConnect{% endblock %}
+
+{% block extra_styles %}
+.profile-page { padding: 48px 64px; max-width: 900px; margin: 0 auto; }
+.profile-card { background: white; border: 1px solid var(--border); border-radius: var(--radius); padding: 32px; display: grid; grid-template-columns: 1fr auto; gap: 24px; align-items: center; }
+.profile-details { display: grid; gap: 16px; }
+.profile-details h1 { margin: 0; font-family: 'Fraunces', serif; font-size: 2rem; color: var(--text-dark); }
+.profile-details p { margin: 0; color: var(--text-light); font-size: 0.95rem; }
+.profile-meta { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.meta-item { background: var(--off-white); border: 1px solid var(--border); border-radius: 16px; padding: 18px; }
+.meta-item h4 { margin: 0 0 8px; font-size: 0.95rem; color: var(--text-dark); }
+.meta-item p { margin: 0; color: var(--text-light); font-size: 0.88rem; }
+.action-row { display: flex; gap: 14px; justify-content: flex-end; margin-top: 20px; }
+.action-row .btn { min-width: 150px; }
+{% endblock %}
+
+{% block content %}
+<div class="profile-page">
+  <div class="profile-card">
+    <div class="profile-details">
+      <h1>{{ user.name }}</h1>
+      <p>Manage your patient profile, update your details, or delete your account.</p>
+      <div class="profile-meta">
+        <div class="meta-item">
+          <h4>Email</h4>
+          <p>{{ user.email }}</p>
+        </div>
+        <div class="meta-item">
+          <h4>Age</h4>
+          <p>{{ user.age or 'Not set' }}</p>
+        </div>
+        <div class="meta-item">
+          <h4>Blood Group</h4>
+          <p>{{ user.blood_group or 'Not set' }}</p>
+        </div>
+        <div class="meta-item">
+          <h4>Joined</h4>
+          <p>{{ user.created_at.strftime('%b %d, %Y') }}</p>
+        </div>
+      </div>
+    </div>
+    <div class="action-row">
+      <a href="/account/update" class="btn btn-outline">Edit profile</a>
+      <a href="/account/delete" class="btn btn-danger" onclick="return confirm('Delete your account and all data? This cannot be undone.')">Delete account</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

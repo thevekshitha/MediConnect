@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>{% block title %}MediConnect{% endblock %}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,400;0,600;1,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --green-dark:   #1a4a2e;
+      --green-mid:    #2d7a4f;
+      --green-light:  #4caf78;
+      --green-pale:   #e8f5ee;
+      --green-accent: #00c96e;
+      --white:        #ffffff;
+      --off-white:    #f7faf8;
+      --text-dark:    #111c15;
+      --text-mid:     #3d5445;
+      --text-light:   #7a9585;
+      --border:       #c8e0d0;
+      --shadow:       0 4px 32px rgba(26,74,46,0.10);
+      --radius:       16px;
+    }
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--off-white);
+      color: var(--text-dark);
+      min-height: 100vh;
+    }
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 48px; height: 68px;
+      background: rgba(255,255,255,0.85);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-logo {
+      font-family: 'Fraunces', serif;
+      font-size: 1.5rem; font-weight: 600;
+      color: var(--green-dark); text-decoration: none;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .nav-logo .logo-icon {
+      width: 32px; height: 32px;
+      background: var(--green-mid); border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      color: white; font-size: 14px;
+    }
+    .nav-links { display: flex; align-items: center; gap: 8px; }
+    .nav-links a {
+      text-decoration: none; color: var(--text-mid);
+      font-size: 0.9rem; font-weight: 500;
+      padding: 8px 18px; border-radius: 50px; transition: all 0.2s;
+    }
+    .nav-links a:hover { background: var(--green-pale); color: var(--green-dark); }
+    .btn-nav {
+      background: var(--green-mid) !important;
+      color: white !important;
+      padding: 8px 20px !important;
+      border-radius: 50px !important;
+    }
+    .btn-nav:hover { background: var(--green-dark) !important; }
+
+    /* DROPDOWN */
+    .dropdown { position: relative; }
+    .dropdown-btn {
+      background: none; border: none; cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem; font-weight: 500;
+      color: var(--text-mid);
+      padding: 8px 18px; border-radius: 50px;
+      transition: all 0.2s; display: flex; align-items: center; gap: 6px;
+    }
+    .dropdown-btn:hover { background: var(--green-pale); color: var(--green-dark); }
+    .dropdown-btn.green {
+      background: var(--green-mid);
+      color: white;
+    }
+    .dropdown-btn.green:hover { background: var(--green-dark); }
+    .dropdown-btn .arrow {
+      font-size: 10px; transition: transform 0.2s;
+    }
+    .dropdown:hover .arrow { transform: rotate(180deg); }
+    .dropdown-menu {
+      display: none;
+      position: absolute; top: calc(100% + 8px); right: 0;
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      box-shadow: 0 8px 32px rgba(26,74,46,0.12);
+      min-width: 200px;
+      overflow: hidden;
+      z-index: 200;
+    }
+    .dropdown:hover .dropdown-menu,
+    .dropdown.open .dropdown-menu { display: block; }
+    .dropdown-menu a {
+      display: flex; align-items: center; gap: 10px;
+      padding: 12px 18px;
+      text-decoration: none;
+      color: var(--text-dark);
+      font-size: 0.88rem;
+      font-weight: 500;
+      transition: all 0.2s;
+      border-radius: 0 !important;
+    }
+    .dropdown-menu a:hover { background: var(--green-pale); color: var(--green-dark); }
+    .dropdown-menu .divider { height: 1px; background: var(--border); margin: 4px 0; }
+    .dropdown-menu .menu-label {
+      padding: 8px 18px 4px;
+      font-size: 0.72rem;
+      font-weight: 500;
+      color: var(--text-light);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    /* FLASH */
+    .flash-container {
+      position: fixed; top: 80px; left: 50%; transform: translateX(-50%);
+      z-index: 200; display: flex; flex-direction: column; gap: 8px; min-width: 320px;
+    }
+    .flash {
+      padding: 12px 20px; border-radius: 10px;
+      font-size: 0.88rem; font-weight: 500;
+      animation: slideDown 0.3s ease;
+    }
+    .flash.success { background: #d4f0e0; color: #1a4a2e; border: 1px solid #a0d8b8; }
+    .flash.error   { background: #fde8e8; color: #7a1a1a; border: 1px solid #f5b8b8; }
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* BUTTONS */
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      padding: 13px 32px; border-radius: 50px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.95rem; font-weight: 500;
+      cursor: pointer; border: none; text-decoration: none; transition: all 0.2s;
+    }
+    .btn-primary { background: var(--green-mid); color: white; }
+    .btn-primary:hover { background: var(--green-dark); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(45,122,79,0.3); }
+    .btn-danger { background: #e74c3c; color: white; }
+    .btn-danger:hover { background: #c0392b; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(224, 89, 75, 0.3); }
+    .btn-outline { background: transparent; color: var(--green-mid); border: 1.5px solid var(--green-mid); }
+    .btn-outline:hover { background: var(--green-pale); }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-group label { font-size: 0.85rem; font-weight: 500; color: var(--text-mid); }
+    .form-group input {
+      padding: 12px 16px;
+      border: 1.5px solid var(--border); border-radius: 10px;
+      font-family: 'DM Sans', sans-serif; font-size: 0.95rem;
+      color: var(--text-dark); background: var(--off-white);
+      transition: all 0.2s; outline: none;
+    }
+    .form-group input:focus {
+      border-color: var(--green-mid); background: white;
+      box-shadow: 0 0 0 3px rgba(45,122,79,0.1);
+    }
+    .page { padding-top: 68px; min-height: 100vh; }
+    {% block extra_styles %}{% endblock %}
+  </style>
+</head>
+<body>
+  <nav>
+    <a class="nav-logo" href="/">
+      <span class="logo-icon">✚</span> MediConnect
+    </a>
+    <div class="nav-links">
+      {% if session.role == "patient" %}
+        <a href="/dashboard">Dashboard</a>
+        <a href="/records">Records</a>
+        <a href="/doctors">Doctors</a>
+        <a href="/reminders">Reminders</a>
+        <a href="/symptom-checker">Symptoms</a>
+        <a href="/account">My Profile</a>
+        <a href="/logout">Logout</a>
+
+      {% elif session.role == "doctor" %}
+        <a href="/doctor/dashboard">Dashboard</a>
+        <a href="/logout">Logout</a>
+
+      {% else %}
+        <!-- Login Dropdown -->
+        <div class="dropdown">
+          <button class="dropdown-btn">
+            Login <span class="arrow">▼</span>
+          </button>
+          <div class="dropdown-menu">
+            <div class="menu-label">Login as</div>
+            <a href="/login">🧑‍⚕️ Patient Login</a>
+            <a href="/doctor/login">👨‍⚕️ Doctor Login</a>
+          </div>
+        </div>
+
+        <!-- Register Dropdown -->
+        <div class="dropdown">
+          <button class="dropdown-btn green">
+            Register <span class="arrow">▼</span>
+          </button>
+          <div class="dropdown-menu">
+            <div class="menu-label">Register as</div>
+            <a href="/register">🧑‍⚕️ Patient Register</a>
+            <a href="/doctor/register">👨‍⚕️ Doctor Register</a>
+          </div>
+        </div>
+
+      {% endif %}
+    </div>
+  </nav>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="flash-container">
+        {% for category, message in messages %}
+          <div class="flash {{ category }}">{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  <div class="page">
+    {% block content %}{% endblock %}
+  </div>
+
+  <script>
+    setTimeout(() => {
+      document.querySelectorAll('.flash').forEach(f => {
+        f.style.opacity = '0';
+        f.style.transition = 'opacity 0.5s';
+        setTimeout(() => f.remove(), 500);
+      });
+    }, 3500);
+
+    document.addEventListener('click', (event) => {
+      document.querySelectorAll('.dropdown').forEach(dropdown => {
+        if (!dropdown.contains(event.target)) {
+          dropdown.classList.remove('open');
+        }
+      });
+    });
+
+    document.querySelectorAll('.dropdown-btn').forEach(btn => {
+      btn.addEventListener('click', (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        const dropdown = btn.closest('.dropdown');
+        document.querySelectorAll('.dropdown.open').forEach(openDropdown => {
+          if (openDropdown !== dropdown) {
+            openDropdown.classList.remove('open');
+          }
+        });
+        dropdown.classList.toggle('open');
+      });
+    });
+
+    document.querySelectorAll('.dropdown-menu a').forEach(link => {
+      link.addEventListener('click', () => {
+        const dropdown = link.closest('.dropdown');
+        if (dropdown) dropdown.classList.remove('open');
+      });
+    });
+  </script>
+</body>
+</html>

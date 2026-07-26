@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — MediConnect{% endblock %}
+
+{% block extra_styles %}
+.dashboard { padding: 48px 64px; max-width: 1200px; margin: 0 auto; }
+.dash-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 40px; }
+.dash-header h1 { font-family: 'Fraunces', serif; font-size: 2rem; font-weight: 600; color: var(--text-dark); }
+.dash-header p { color: var(--text-light); margin-top: 6px; font-size: 0.95rem; }
+.stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 40px; }
+.stat-card { background: white; border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; display: flex; flex-direction: column; gap: 10px; text-decoration: none; transition: all 0.2s; }
+.stat-card:hover { border-color: var(--green-light); box-shadow: var(--shadow); transform: translateY(-2px); }
+.stat-card .icon { font-size: 28px; width: 52px; height: 52px; background: var(--green-pale); border-radius: 12px; display: flex; align-items: center; justify-content: center; }
+.stat-card .number { font-family: 'Fraunces', serif; font-size: 2rem; font-weight: 600; color: var(--text-dark); }
+.stat-card .label { font-size: 0.85rem; color: var(--text-light); font-weight: 500; }
+.dashboard-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 24px; }
+.section-card { background: white; border: 1px solid var(--border); border-radius: var(--radius); padding: 28px; }
+.section-card h3 { font-size: 1rem; font-weight: 500; color: var(--text-dark); margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; }
+.section-card h3 a { font-size: 0.8rem; color: var(--green-mid); text-decoration: none; font-weight: 400; }
+.action-list { display: flex; flex-direction: column; gap: 12px; }
+.action-item { display: flex; align-items: center; gap: 14px; padding: 14px 16px; border: 1px solid var(--border); border-radius: 10px; text-decoration: none; color: var(--text-dark); transition: all 0.2s; }
+.action-item:hover { border-color: var(--green-light); background: var(--green-pale); transform: translateX(3px); }
+.action-item .aicon { width: 40px; height: 40px; background: var(--green-pale); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+.action-item .atext h4 { font-size: 0.9rem; font-weight: 500; }
+.action-item .atext p { font-size: 0.8rem; color: var(--text-light); margin-top: 2px; }
+.recent-item { display: flex; align-items: center; gap: 12px; padding: 12px; background: var(--off-white); border-radius: 10px; margin-bottom: 10px; text-decoration: none; transition: all 0.2s; }
+.recent-item:hover { background: var(--green-pale); }
+.recent-item .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green-accent); flex-shrink: 0; }
+.recent-item .rtext h4 { font-size: 0.85rem; font-weight: 500; color: var(--text-dark); }
+.recent-item .rtext p { font-size: 0.78rem; color: var(--text-light); }
+.status-badge { padding: 3px 8px; border-radius: 50px; font-size: 0.72rem; font-weight: 500; margin-left: auto; }
+.status-badge.pending  { background: #fef3e2; color: #854f0b; }
+.status-badge.accepted { background: #d4f0e0; color: #1a4a2e; }
+.status-badge.rejected { background: #fde8e8; color: #a32d2d; }
+.empty-state { text-align: center; padding: 24px; color: var(--text-light); font-size: 0.88rem; }
+{% endblock %}
+
+{% block content %}
+<div class="dashboard">
+  <div class="dash-header">
+  <div>
+    <h1>{{ greeting }}, {{ name }} 👋</h1>
+    <p>Here's your health summary for today.</p>
+  </div>
+</div>
+  <div class="stats-row">
+    <a href="/records" class="stat-card">
+      <div class="icon">📋</div>
+      <div class="number">{{ total_records }}</div>
+      <div class="label">Medical Records</div>
+    </a>
+    <a href="/appointments" class="stat-card">
+      <div class="icon">👨‍⚕️</div>
+      <div class="number">{{ total_appointments }}</div>
+      <div class="label">Appointments</div>
+    </a>
+    <a href="/reminders" class="stat-card">
+      <div class="icon">💊</div>
+      <div class="number">{{ total_reminders }}</div>
+      <div class="label">Active Reminders</div>
+    </a>
+    <a href="/symptom-checker" class="stat-card">
+      <div class="icon">🔬</div>
+      <div class="number">AI</div>
+      <div class="label">Symptom Checker</div>
+    </a>
+  </div>
+  <div class="dashboard-grid">
+    <div class="section-card">
+      <h3>Quick Actions <a href="#">View all</a></h3>
+      <div class="action-list">
+        <a href="/records/add" class="action-item">
+          <div class="aicon">📁</div>
+          <div class="atext"><h4>Add Medical Record</h4><p>Upload prescriptions, test results, reports</p></div>
+        </a>
+        <a href="/records" class="action-item">
+          <div class="aicon">📋</div>
+          <div class="atext"><h4>View All Records</h4><p>See your complete medical history</p></div>
+        </a>
+        <a href="/doctors" class="action-item">
+          <div class="aicon">👨‍⚕️</div>
+          <div class="atext"><h4>Find a Doctor</h4><p>Browse specialists and book a consultation</p></div>
+        </a>
+        <a href="/account" class="action-item">
+          <div class="aicon">👤</div>
+          <div class="atext"><h4>My Profile</h4><p>View and manage your personal information</p></div>
+        </a>
+        <a href="/reminders/add" class="action-item">
+          <div class="aicon">⏰</div>
+          <div class="atext"><h4>Set Medicine Reminder</h4><p>Never miss a dose with smart alerts</p></div>
+        </a>
+      </div>
+    </div>
+    <div class="section-card">
+      <h3>Recent Records <a href="/records">View all</a></h3>
+      {% if records %}
+        {% for record in records %}
+          <a href="/records" class="recent-item">
+            <div class="dot"></div>
+            <div class="rtext">
+              <h4>{{ record.title }}</h4>
+              <p>{{ record.record_type }} · {{ record.date }}</p>
+            </div>
+          </a>
+        {% endfor %}
+      {% else %}
+        <div class="empty-state">
+          📋 No records yet<br>
+          <a href="/records/add" style="color:var(--green-mid);">Add your first record</a>
+        </div>
+      {% endif %}
+      <h3 style="margin-top: 24px;">Appointments <a href="/doctors">Book new</a></h3>
+      {% if appointments %}
+        {% for apt in appointments %}
+          <div class="recent-item">
+            <div class="dot" style="background: var(--green-mid);"></div>
+            <div class="rtext">
+              <h4>Dr. {{ apt.doctor.name }}</h4>
+              <p>{{ apt.date }} at {{ apt.time }}</p>
+            </div>
+            <a href="/appointments/delete/{{ apt.id }}" class="btn btn-outline" style="padding:8px 14px; font-size:0.82rem;">Cancel</a>
+            <span class="status-badge {{ apt.status|lower }}">{{ apt.status }}</span>
+          </div>
+        {% endfor %}
+      {% else %}
+        <div class="empty-state">
+          🗓️ No appointments yet<br>
+          <a href="/doctors" style="color:var(--green-mid);">Find a doctor</a>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

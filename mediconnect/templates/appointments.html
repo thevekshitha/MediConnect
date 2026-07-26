@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}My Appointments — MediConnect{% endblock %}
+
+{% block extra_styles %}
+.appointments-page { padding: 48px 64px; max-width: 1000px; margin: 0 auto; }
+.page-header { margin-bottom: 30px; }
+.page-header h1 { font-family: 'Fraunces', serif; font-size: 2rem; font-weight: 600; color: var(--text-dark); }
+.page-header p { color: var(--text-light); font-size: 0.9rem; margin-top: 4px; }
+.app-card { background: white; border: 1px solid var(--border); border-radius: var(--radius); padding: 28px; }
+.app-item { display: grid; grid-template-columns: 1fr auto; gap: 16px; align-items: center; padding: 20px 0; border-bottom: 1px solid var(--border); }
+.app-item:last-child { border-bottom: none; }
+.app-details h3 { margin: 0 0 6px; font-size: 1rem; color: var(--text-dark); }
+.app-details p { margin: 0; color: var(--text-light); font-size: 0.92rem; }
+.app-actions { display: flex; gap: 10px; align-items: center; }
+.status-badge { padding: 6px 12px; border-radius: 50px; font-size: 0.82rem; font-weight: 500; }
+.status-badge.pending  { background: #fef3e2; color: #854f0b; }
+.status-badge.accepted { background: #d4f0e0; color: #1a4a2e; }
+.status-badge.rejected { background: #fde8e8; color: #a32d2d; }
+.empty-state { text-align: center; padding: 28px; color: var(--text-light); font-size: 0.92rem; }
+{% endblock %}
+
+{% block content %}
+<div class="appointments-page">
+  <div class="page-header">
+    <h1>My Appointments</h1>
+    <p>Manage your upcoming consultations and cancel appointments if needed.</p>
+  </div>
+  <div class="app-card">
+    {% if appointments %}
+      {% for apt in appointments %}
+        <div class="app-item">
+          <div class="app-details">
+            <h3>Dr. {{ apt.doctor.name }} — {{ apt.doctor.specialization }}</h3>
+            <p>{{ apt.date }} at {{ apt.time }}</p>
+            <p>{{ apt.reason }}</p>
+          </div>
+          <div class="app-actions">
+            <span class="status-badge {{ apt.status|lower }}">{{ apt.status }}</span>
+            <a href="/appointments/delete/{{ apt.id }}" class="btn btn-outline" onclick="return confirm('Cancel this appointment?')">Cancel</a>
+          </div>
+        </div>
+      {% endfor %}
+    {% else %}
+      <div class="empty-state">
+        You have no scheduled appointments.<br>
+        <a href="/doctors" class="btn btn-primary" style="margin-top:16px; display:inline-block;">Book a doctor</a>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

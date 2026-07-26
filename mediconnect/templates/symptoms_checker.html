@@ -1,0 +1,434 @@
+{% extends "base.html" %}
+{% block title %}Symptom Checker — MediConnect{% endblock %}
+
+{% block extra_styles %}
+.checker-page { padding: 48px 64px; max-width: 900px; margin: 0 auto; }
+.page-header { margin-bottom: 40px; }
+.page-header h1 { font-family: 'Fraunces', serif; font-size: 2rem; font-weight: 600; color: var(--text-dark); }
+.page-header p { color: var(--text-light); font-size: 0.9rem; margin-top: 4px; }
+.ai-badge { display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; background: var(--green-pale); border: 1px solid var(--border); border-radius: 50px; font-size: 0.8rem; font-weight: 500; color: var(--green-mid); margin-bottom: 16px; }
+.checker-card { background: white; border: 1px solid var(--border); border-radius: var(--radius); padding: 40px; margin-bottom: 24px; }
+.form-stack { display: flex; flex-direction: column; gap: 20px; margin-bottom: 28px; }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.form-group select {
+  padding: 12px 16px; border: 1.5px solid var(--border); border-radius: 10px;
+  font-family: 'DM Sans', sans-serif; font-size: 0.95rem;
+  color: var(--text-dark); background: var(--off-white);
+  transition: all 0.2s; outline: none; width: 100%;
+}
+.form-group select:focus { border-color: var(--green-mid); background: white; box-shadow: 0 0 0 3px rgba(45,122,79,0.1); }
+.form-group textarea {
+  padding: 16px; border: 1.5px solid var(--border); border-radius: 10px;
+  font-family: 'DM Sans', sans-serif; font-size: 0.95rem;
+  color: var(--text-dark); background: var(--off-white);
+  transition: all 0.2s; outline: none; width: 100%;
+  resize: vertical; min-height: 160px; line-height: 1.6;
+}
+.form-group textarea:focus { border-color: var(--green-mid); background: white; box-shadow: 0 0 0 3px rgba(45,122,79,0.1); }
+.quick-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.quick-tag { padding: 6px 14px; background: var(--green-pale); border: 1px solid var(--border); border-radius: 50px; font-size: 0.8rem; color: var(--green-dark); cursor: pointer; transition: all 0.2s; }
+.quick-tag:hover { background: var(--green-mid); color: white; border-color: var(--green-mid); }
+.analyze-btn { width: 100%; padding: 16px; background: var(--green-mid); color: white; border: none; border-radius: 12px; font-family: 'DM Sans', sans-serif; font-size: 1rem; font-weight: 500; cursor: pointer; transition: all 0.2s; }
+.analyze-btn:hover { background: var(--green-dark); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(45,122,79,0.3); }
+.loading { display: none; text-align: center; padding: 60px 40px; background: white; border: 1px solid var(--border); border-radius: var(--radius); }
+.loading-spinner { width: 52px; height: 52px; border: 3px solid var(--border); border-top-color: var(--green-mid); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading p { color: var(--text-light); font-size: 0.9rem; }
+.result-card { display: none; background: white; border: 1px solid var(--border); border-radius: var(--radius); padding: 40px; }
+.result-header { display: flex; align-items: center; gap: 12px; margin-bottom: 28px; padding-bottom: 20px; border-bottom: 1px solid var(--border); }
+.result-icon { width: 52px; height: 52px; background: var(--green-pale); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; }
+.result-header h2 { font-family: 'Fraunces', serif; font-size: 1.4rem; font-weight: 600; color: var(--text-dark); }
+.result-header p { color: var(--text-light); font-size: 0.85rem; margin-top: 2px; }
+.severity-bar { display: flex; align-items: center; gap: 12px; padding: 14px 18px; border-radius: 10px; margin-bottom: 24px; font-weight: 500; font-size: 0.9rem; }
+.severity-bar.low { background: #d4f0e0; color: #1a4a2e; }
+.severity-bar.medium { background: #fef3e2; color: #854f0b; }
+.severity-bar.high { background: #fde8e8; color: #a32d2d; }
+.result-section { margin-bottom: 24px; }
+.result-section h3 { font-size: 0.85rem; font-weight: 500; color: var(--text-mid); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 12px; }
+.condition-list { display: flex; flex-direction: column; gap: 10px; }
+.condition-item { padding: 14px 18px; background: var(--off-white); border-radius: 10px; border-left: 3px solid var(--green-mid); }
+.condition-item h4 { font-size: 0.95rem; font-weight: 500; color: var(--text-dark); }
+.condition-item p { font-size: 0.82rem; color: var(--text-light); margin-top: 4px; }
+.advice-list { display: flex; flex-direction: column; gap: 8px; }
+.advice-item { display: flex; align-items: flex-start; gap: 10px; padding: 10px 14px; background: var(--off-white); border-radius: 8px; font-size: 0.88rem; color: var(--text-dark); }
+.warning-item { display: flex; align-items: flex-start; gap: 10px; padding: 10px 14px; background: #fde8e8; border-radius: 8px; font-size: 0.88rem; color: #a32d2d; }
+.disclaimer { margin-top: 24px; padding: 16px; background: #fef3e2; border: 1px solid #fac775; border-radius: 10px; font-size: 0.82rem; color: #854f0b; }
+.result-actions { display: flex; flex-direction: column; gap: 12px; margin-top: 24px; }
+.char-count { text-align: right; font-size: 0.78rem; color: var(--text-light); margin-top: 4px; }
+{% endblock %}
+
+{% block content %}
+<div class="checker-page">
+  <div class="page-header">
+    <div class="ai-badge">🔬 Smart Symptom Analysis</div>
+    <h1>Symptom Checker</h1>
+    <p>Type your symptoms in detail and get instant health insights for free</p>
+    {% if not logged_in %}
+      <p style="color:var(--green-mid); margin-top: 10px;">Enter your symptoms now — we will ask you to login before analyzing your results.</p>
+    {% endif %}
+  </div>
+
+  <div class="checker-card" id="inputCard">
+    <div class="form-stack">
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Your Age</label>
+          <input type="number" id="age" placeholder="e.g. 25" min="1" max="120" />
+        </div>
+        <div class="form-group">
+          <label>Gender</label>
+          <select id="gender">
+            <option value="" disabled selected>Select gender</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Describe your symptoms in detail</label>
+        <textarea
+          id="symptoms"
+          placeholder="Type everything you are feeling here...
+
+For example:
+- I have had a headache for 2 days
+- Mild fever around 38°C since yesterday
+- Sore throat and difficulty swallowing
+- Body feels weak and tired
+- No appetite since morning
+
+The more details you give, the better the analysis!"
+          oninput="updateCharCount(this)"
+        ></textarea>
+        <div class="char-count" id="charCount">0 characters</div>
+
+        <div style="margin-top: 12px;">
+          <p style="font-size:0.82rem; color:var(--text-light); margin-bottom: 8px;">Quick add:</p>
+          <div class="quick-tags">
+            <span class="quick-tag" onclick="addText('headache')">🤕 Headache</span>
+            <span class="quick-tag" onclick="addText('fever')">🌡️ Fever</span>
+            <span class="quick-tag" onclick="addText('cough')">😮‍💨 Cough</span>
+            <span class="quick-tag" onclick="addText('sore throat')">🤒 Sore throat</span>
+            <span class="quick-tag" onclick="addText('stomach pain')">🤢 Stomach pain</span>
+            <span class="quick-tag" onclick="addText('nausea')">😖 Nausea</span>
+            <span class="quick-tag" onclick="addText('fatigue')">😴 Fatigue</span>
+            <span class="quick-tag" onclick="addText('dizziness')">😵 Dizziness</span>
+            <span class="quick-tag" onclick="addText('chest pain')">💔 Chest pain</span>
+            <span class="quick-tag" onclick="addText('body aches')">💪 Body aches</span>
+            <span class="quick-tag" onclick="addText('runny nose')">🤧 Runny nose</span>
+            <span class="quick-tag" onclick="addText('chills')">🥶 Chills</span>
+            <span class="quick-tag" onclick="addText('vomiting')">🤮 Vomiting</span>
+            <span class="quick-tag" onclick="addText('diarrhea')">💊 Diarrhea</span>
+            <span class="quick-tag" onclick="addText('back pain')">🦴 Back pain</span>
+            <span class="quick-tag" onclick="addText('joint pain')">🦵 Joint pain</span>
+            <span class="quick-tag" onclick="addText('skin rash')">🩹 Skin rash</span>
+            <span class="quick-tag" onclick="addText('loss of appetite')">🍽️ Loss of appetite</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <button class="analyze-btn" onclick="analyzeSymptoms()">🔬 Analyze My Symptoms</button>
+  </div>
+
+  <div class="loading" id="loading">
+    <div class="loading-spinner"></div>
+    <p>Analyzing your symptoms...</p>
+  </div>
+
+  <div class="result-card" id="resultCard">
+    <div class="result-header">
+      <div class="result-icon">🏥</div>
+      <div>
+        <h2>Analysis Complete</h2>
+        <p>Based on your symptoms, here's what we found</p>
+      </div>
+    </div>
+    <div id="resultContent"></div>
+    <div class="disclaimer">
+      ⚠️ This is for educational purposes only and is NOT a medical diagnosis. Always consult a qualified doctor for proper medical advice and treatment.
+    </div>
+    <div class="result-actions">
+      <a href="/doctors" class="btn btn-primary">👨‍⚕️ Find a Doctor Now</a>
+      <button class="btn btn-outline" onclick="resetChecker()">🔄 Check Again</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function updateCharCount(textarea) {
+  document.getElementById('charCount').textContent = textarea.value.length + ' characters';
+}
+
+function addText(symptom) {
+  const textarea = document.getElementById('symptoms');
+  if (textarea.value.trim()) {
+    textarea.value += ', ' + symptom;
+  } else {
+    textarea.value = symptom;
+  }
+  updateCharCount(textarea);
+  textarea.focus();
+}
+
+async function analyzeSymptoms() {
+  const symptoms = document.getElementById('symptoms').value.trim();
+  const age = document.getElementById('age').value || '';
+  const gender = document.getElementById('gender').value || '';
+
+  if (!symptoms) {
+    alert('Please describe your symptoms first!');
+    return;
+  }
+  if (symptoms.length < 5) {
+    alert('Please describe your symptoms in more detail!');
+    return;
+  }
+
+  document.getElementById('inputCard').style.display = 'none';
+  document.getElementById('loading').style.display = 'block';
+  document.getElementById('resultCard').style.display = 'none';
+
+  try {
+    const resp = await fetch('/api/analyze-symptoms', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ symptoms, age, gender })
+    });
+    if (resp.status === 401) {
+      alert('Please login to analyze your symptoms.');
+      window.location.href = '/login';
+      return;
+    }
+    const data = await resp.json();
+
+    if (data.error) throw new Error(data.error);
+
+    // Build result HTML from API response
+    const sevClass = data.severity || 'low';
+    const sevEmoji = sevClass === 'high' ? '🔴' : sevClass === 'medium' ? '🟡' : '🟢';
+    let html = `<div class="severity-bar ${sevClass}"><span>Severity Level:</span> <strong>${sevEmoji} ${data.severityLabel || data.severity}</strong></div>`;
+
+    if (data.conditions?.length) {
+      html += `<div class="result-section"><h3>Possible Conditions</h3><div class="condition-list">
+        ${data.conditions.map(c => `<div class="condition-item"><h4>${c.name}</h4><p>${c.desc}</p></div>`).join('')}
+      </div></div>`;
+    }
+    if (data.homeRemedies?.length) {
+      html += `<div class="result-section"><h3>Home Remedies</h3><div class="advice-list">
+        ${data.homeRemedies.map(r => `<div class="advice-item">🌿 ${r}</div>`).join('')}
+      </div></div>`;
+    }
+    if (data.actions?.length) {
+      html += `<div class="result-section"><h3>Recommended Actions</h3><div class="advice-list">
+        ${data.actions.map(a => `<div class="advice-item">✅ ${a}</div>`).join('')}
+      </div></div>`;
+    }
+    if (data.warnings?.length) {
+      html += `<div class="result-section"><h3>Warning Signs</h3><div class="advice-list">
+        ${data.warnings.map(w => `<div class="warning-item">🚨 ${w}</div>`).join('')}
+      </div></div>`;
+    }
+
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('resultCard').style.display = 'block';
+    document.getElementById('resultContent').innerHTML = html;
+
+  } catch (err) {
+    // Fallback to local rule-based diagnosis if API fails
+    const result = diagnose(symptoms.toLowerCase(), age, gender);
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('resultCard').style.display = 'block';
+    document.getElementById('resultContent').innerHTML = result;
+  }
+}
+
+function diagnose(text, age, gender) {
+  let conditions = [];
+  let severity = 'low';
+  let actions = [];
+  let homeRemedies = [];
+  let warnings = [];
+
+  const has = (word) => text.includes(word);
+
+  if (has('chest pain') || has('chest ache') || (has('shortness of breath') || has('cant breathe') || has("can't breathe"))) {
+    conditions.push({ name: '⚠️ Possible Cardiac / Respiratory Issue', desc: 'Chest pain and breathing difficulty need immediate medical attention.' });
+    severity = 'high';
+    warnings.push('Seek EMERGENCY care immediately if chest pain is severe');
+    warnings.push('Call emergency services (108) right away');
+    actions.push('Do NOT ignore chest pain — see a doctor immediately');
+  }
+
+  if ((has('fever') || has('temperature') || has('38') || has('39')) && (has('cough') || has('body ache') || has('body pain'))) {
+    conditions.push({ name: 'Influenza (Flu)', desc: 'A viral infection causing fever, cough and body aches — very common and usually resolves in 5-7 days.' });
+    severity = severity === 'high' ? 'high' : 'medium';
+    homeRemedies.push('Rest and drink plenty of fluids');
+    homeRemedies.push('Take paracetamol for fever and body pain');
+    homeRemedies.push('Eat warm soups and stay hydrated');
+    actions.push('See a doctor if fever exceeds 39°C or lasts more than 3 days');
+  }
+
+  if ((has('cold') || (has('runny nose') || has('blocked nose'))) && (has('sore throat') || has('cough'))) {
+    conditions.push({ name: 'Common Cold', desc: 'A mild viral infection of the upper respiratory tract — usually resolves in 7-10 days.' });
+    homeRemedies.push('Gargle with warm salt water for sore throat');
+    homeRemedies.push('Drink warm water with honey and ginger');
+    homeRemedies.push('Use steam inhalation for nasal congestion');
+  }
+
+  if ((has('fever') || has('temperature')) && (has('headache') || has('head pain')) && (has('chill') || has('shiver'))) {
+    conditions.push({ name: 'Viral Fever / Possible Dengue', desc: 'Fever with headache and chills could indicate dengue or another viral infection. Common in tropical regions.' });
+    severity = severity === 'high' ? 'high' : 'medium';
+    actions.push('Get a blood test to rule out dengue fever');
+    actions.push('See a doctor if fever is very high or skin rash appears');
+    warnings.push('Seek emergency care if severe headache with stiff neck occurs');
+  }
+
+  if ((has('stomach') || has('abdomen') || has('tummy') || has('belly')) && (has('pain') || has('ache') || has('cramp'))) {
+    conditions.push({ name: 'Gastritis / Indigestion', desc: 'Inflammation or irritation of the stomach lining causing pain and discomfort.' });
+    homeRemedies.push('Eat small bland meals — avoid spicy and oily food');
+    homeRemedies.push('Drink ginger tea or warm plain water');
+    homeRemedies.push('Try antacids for immediate relief');
+    actions.push('See a doctor if pain is severe or persists more than 2 days');
+  }
+
+  if (has('vomit') || has('throwing up')) {
+    if (has('diarrhea') || has('loose stool') || has('loose motion')) {
+      conditions.push({ name: 'Gastroenteritis', desc: 'Stomach infection causing vomiting and diarrhea — commonly called stomach flu.' });
+      severity = severity === 'high' ? 'high' : 'medium';
+      homeRemedies.push('Stay hydrated with ORS (Oral Rehydration Solution)');
+      homeRemedies.push('Eat plain rice, bananas, toast (BRAT diet)');
+      homeRemedies.push('Avoid dairy and fatty foods until recovered');
+      warnings.push('Seek emergency care if you cannot keep fluids down for 24 hours');
+    }
+  }
+
+  if ((has('joint') || has('knee') || has('elbow') || has('wrist')) && (has('pain') || has('ache') || has('swelling'))) {
+    if (has('fever') || has('temperature')) {
+      conditions.push({ name: 'Chikungunya / Viral Arthritis', desc: 'Joint pain with fever is common in mosquito-borne illnesses like chikungunya.' });
+      severity = severity === 'high' ? 'high' : 'medium';
+      actions.push('Get a blood test to rule out chikungunya or dengue');
+    } else {
+      conditions.push({ name: 'Arthritis / Joint Strain', desc: 'Joint pain can be due to overuse, injury, or arthritis.' });
+    }
+    homeRemedies.push('Apply warm compress on painful joints');
+    homeRemedies.push('Rest and avoid strenuous activity');
+  }
+
+  if (has('rash') || has('skin') && has('itch')) {
+    conditions.push({ name: 'Allergic Reaction / Skin Infection', desc: 'Skin rash can be due to allergy, infection, or irritation.' });
+    if (has('fever') || has('temperature')) severity = severity === 'high' ? 'high' : 'medium';
+    actions.push('See a doctor to identify the cause of the rash');
+    homeRemedies.push('Avoid scratching the rash area');
+    homeRemedies.push('Apply calamine lotion for itching');
+    warnings.push('Seek emergency care if rash spreads rapidly or causes breathing difficulty');
+  }
+
+  if ((has('tired') || has('fatigue') || has('weak') || has('exhausted')) && (has('no appetite') || has('loss of appetite') || has('not eating'))) {
+    conditions.push({ name: 'Anemia / General Weakness', desc: 'Fatigue with loss of appetite may indicate nutritional deficiency or anemia.' });
+    homeRemedies.push('Eat iron-rich foods like spinach, lentils, eggs');
+    homeRemedies.push('Take vitamin C with meals to improve iron absorption');
+    actions.push('Get a complete blood count (CBC) test done');
+  }
+
+  if ((has('headache') || has('head pain') || has('migraine')) && (has('dizzy') || has('dizziness') || has('spinning'))) {
+    conditions.push({ name: 'Migraine / Low Blood Pressure', desc: 'Headache with dizziness can indicate migraine, dehydration, or low blood pressure.' });
+    homeRemedies.push('Drink water and rest in a dark quiet room');
+    homeRemedies.push('Apply cold or warm compress on forehead');
+    homeRemedies.push('Eat something light if you have not eaten recently');
+  }
+
+  if ((has('anxious') || has('anxiety') || has('stress') || has('worried')) && (has('sleep') || has('insomnia') || has('cant sleep'))) {
+    conditions.push({ name: 'Anxiety / Stress Disorder', desc: 'Anxiety and sleep problems often go together and may be stress-related.' });
+    homeRemedies.push('Practice deep breathing exercises for 5-10 minutes');
+    homeRemedies.push('Avoid caffeine and screens 1 hour before bed');
+    homeRemedies.push('Try meditation or light yoga');
+    actions.push('Consider speaking with a mental health professional');
+  }
+
+  if (has('back pain') || has('back ache') || has('lower back')) {
+    conditions.push({ name: 'Muscle Strain / Posture Issues', desc: 'Back pain is commonly caused by poor posture, muscle strain, or prolonged sitting.' });
+    homeRemedies.push('Apply hot or cold compress on the affected area');
+    homeRemedies.push('Do gentle stretching exercises');
+    homeRemedies.push('Avoid sitting in one position for long periods');
+  }
+
+  if (conditions.length === 0) {
+    conditions.push({ name: 'General Discomfort', desc: 'Based on what you described, this may be due to stress, fatigue, or a mild condition.' });
+    homeRemedies.push('Rest well and drink plenty of water');
+    homeRemedies.push('Eat nutritious meals and avoid junk food');
+    homeRemedies.push('Monitor your symptoms for 24-48 hours');
+    actions.push('See a doctor if symptoms worsen or new symptoms appear');
+  }
+
+  const severityLabel = severity === 'high'
+    ? '🔴 High — Please see a doctor immediately'
+    : severity === 'medium'
+    ? '🟡 Medium — Monitor and consult a doctor soon'
+    : '🟢 Low — Home care should help';
+
+  let html = `
+    <div class="severity-bar ${severity}">
+      <span>Severity Level:</span> <strong>${severityLabel}</strong>
+    </div>
+    <div class="result-section">
+      <h3>Possible Conditions</h3>
+      <div class="condition-list">
+        ${conditions.map(c => `
+          <div class="condition-item">
+            <h4>${c.name}</h4>
+            <p>${c.desc}</p>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+
+  if (homeRemedies.length > 0) {
+    html += `
+      <div class="result-section">
+        <h3>Home Remedies</h3>
+        <div class="advice-list">
+          ${homeRemedies.map(r => `<div class="advice-item">🌿 ${r}</div>`).join('')}
+        </div>
+      </div>
+    `;
+  }
+
+  if (actions.length > 0) {
+    html += `
+      <div class="result-section">
+        <h3>Recommended Actions</h3>
+        <div class="advice-list">
+          ${actions.map(a => `<div class="advice-item">✅ ${a}</div>`).join('')}
+        </div>
+      </div>
+    `;
+  }
+
+  if (warnings.length > 0) {
+    html += `
+      <div class="result-section">
+        <h3>Warning Signs</h3>
+        <div class="advice-list">
+          ${warnings.map(w => `<div class="warning-item">🚨 ${w}</div>`).join('')}
+        </div>
+      </div>
+    `;
+  }
+
+  return html;
+}
+
+function resetChecker() {
+  document.getElementById('inputCard').style.display = 'block';
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('resultCard').style.display = 'none';
+  document.getElementById('symptoms').value = '';
+  document.getElementById('age').value = '';
+  document.getElementById('gender').value = '';
+  document.getElementById('charCount').textContent = '0 characters';
+}
+</script>
+{% endblock %}

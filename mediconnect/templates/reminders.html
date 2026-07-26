@@ -1,0 +1,289 @@
+{% extends "base.html" %}
+{% block title %}Medicine Reminders — MediConnect{% endblock %}
+
+{% block extra_styles %}
+.reminders-page { padding: 48px 64px; max-width: 1200px; margin: 0 auto; }
+.page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 40px; }
+.page-header h1 { font-family: 'Fraunces', serif; font-size: 2rem; font-weight: 600; color: var(--text-dark); }
+.page-header p { color: var(--text-light); font-size: 0.9rem; margin-top: 4px; }
+.premium-banner { background: linear-gradient(135deg, #1a4a2e, #2d7a4f); border-radius: var(--radius); padding: 24px 32px; margin-bottom: 32px; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+.premium-banner h3 { font-family: 'Fraunces', serif; font-size: 1.2rem; color: white; font-weight: 600; margin-bottom: 4px; }
+.premium-banner p { color: rgba(255,255,255,0.7); font-size: 0.85rem; }
+.btn-premium { background: white; color: var(--green-dark); padding: 10px 24px; border-radius: 50px; font-weight: 500; font-size: 0.88rem; text-decoration: none; white-space: nowrap; transition: all 0.2s; border: none; cursor: pointer; }
+.btn-premium:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(0,0,0,0.2); }
+.voice-status { background: var(--green-pale); border: 1px solid var(--border); border-radius: 12px; padding: 16px 20px; margin-bottom: 28px; display: flex; align-items: center; gap: 12px; font-size: 0.88rem; color: var(--green-dark); }
+.voice-dot { width: 10px; height: 10px; background: var(--green-accent); border-radius: 50%; animation: pulse 2s infinite; flex-shrink: 0; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+.reminders-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.reminder-card { background: white; border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; transition: all 0.2s; }
+.reminder-card:hover { border-color: var(--green-light); box-shadow: var(--shadow); transform: translateY(-2px); }
+.reminder-card.inactive { opacity: 0.6; }
+.reminder-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.medicine-icon { width: 48px; height: 48px; background: var(--green-pale); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; }
+.active-badge { padding: 4px 12px; border-radius: 50px; font-size: 0.75rem; font-weight: 500; }
+.active-badge.active { background: #d4f0e0; color: #1a4a2e; }
+.active-badge.inactive { background: #f1efea; color: #5f5e5a; }
+.medicine-name { font-family: 'Fraunces', serif; font-size: 1.1rem; font-weight: 600; color: var(--text-dark); margin-bottom: 4px; }
+.medicine-dosage { font-size: 0.85rem; color: var(--green-mid); font-weight: 500; margin-bottom: 16px; }
+.reminder-times { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+.time-pill { padding: 4px 12px; border-radius: 50px; font-size: 0.75rem; font-weight: 500; background: var(--green-pale); color: var(--green-dark); }
+.reminder-meta { font-size: 0.82rem; color: var(--text-light); margin-bottom: 16px; }
+.reminder-meta span { display: block; margin-bottom: 4px; }
+.reminder-notes { font-size: 0.82rem; color: var(--text-light); background: var(--off-white); padding: 10px 14px; border-radius: 8px; margin-bottom: 16px; }
+.reminder-footer { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.btn-speak { background: var(--green-pale); color: var(--green-dark); border: none; padding: 6px 14px; border-radius: 8px; font-size: 0.8rem; cursor: pointer; transition: all 0.2s; }
+.btn-speak:hover { background: var(--green-mid); color: white; }
+.btn-toggle-on { background: #fef3e2; color: #854f0b; border: none; padding: 6px 14px; border-radius: 8px; font-size: 0.8rem; cursor: pointer; text-decoration: none; transition: all 0.2s; }
+.btn-toggle-off { background: #d4f0e0; color: #1a4a2e; border: none; padding: 6px 14px; border-radius: 8px; font-size: 0.8rem; cursor: pointer; text-decoration: none; transition: all 0.2s; }
+.btn-delete { background: #fde8e8; color: #a32d2d; border: none; padding: 6px 14px; border-radius: 8px; font-size: 0.8rem; cursor: pointer; text-decoration: none; transition: all 0.2s; margin-left: auto; }
+.btn-delete:hover { background: #f5b8b8; }
+.empty-state { text-align: center; padding: 80px 40px; background: white; border: 1px solid var(--border); border-radius: var(--radius); }
+.empty-icon { font-size: 48px; margin-bottom: 16px; }
+.empty-state h3 { font-family: 'Fraunces', serif; font-size: 1.5rem; color: var(--text-dark); margin-bottom: 8px; }
+.empty-state p { color: var(--text-light); font-size: 0.9rem; margin-bottom: 24px; }
+.alarm-popup { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 9999; align-items: center; justify-content: center; }
+.alarm-popup.show { display: flex; }
+.alarm-box { background: white; border-radius: 24px; padding: 48px 40px; text-align: center; max-width: 440px; width: 90%; animation: popIn 0.3s ease; }
+@keyframes popIn { from{opacity:0;transform:scale(0.8)} to{opacity:1;transform:scale(1)} }
+.alarm-icon { font-size: 72px; margin-bottom: 16px; animation: shake 0.6s infinite; }
+@keyframes shake { 0%,100%{transform:rotate(-15deg)} 50%{transform:rotate(15deg)} }
+.alarm-title { font-family: 'Fraunces', serif; font-size: 2rem; font-weight: 600; color: var(--green-dark); margin-bottom: 12px; }
+.alarm-medicine { font-size: 1.3rem; font-weight: 500; color: var(--text-dark); margin-bottom: 8px; }
+.alarm-dosage { font-size: 1rem; color: var(--text-light); margin-bottom: 8px; }
+.alarm-message { font-size: 1.1rem; color: var(--green-mid); font-weight: 500; margin-bottom: 28px; }
+.btn-dismiss { background: var(--green-mid); color: white; border: none; padding: 16px 48px; border-radius: 50px; font-size: 1.1rem; font-weight: 500; cursor: pointer; transition: all 0.2s; width: 100%; }
+.btn-dismiss:hover { background: var(--green-dark); }
+.btn-snooze { background: var(--off-white); color: var(--text-mid); border: 1px solid var(--border); padding: 10px 24px; border-radius: 50px; font-size: 0.9rem; cursor: pointer; transition: all 0.2s; width: 100%; margin-top: 10px; }
+.btn-snooze:hover { background: var(--green-pale); }
+{% endblock %}
+
+{% block content %}
+<div class="reminders-page">
+  <div class="page-header">
+    <div>
+      <h1>Medicine Reminders</h1>
+      <p>Never miss a dose with your personal medicine tracker</p>
+    </div>
+    {% if logged_in %}
+      <a href="/reminders/add" class="btn btn-primary">+ Add Reminder</a>
+    {% else %}
+      <a href="/login" class="btn btn-outline">Login to view reminders</a>
+    {% endif %}
+  </div>
+
+  {% if logged_in %}
+    <div class="premium-banner">
+      <div>
+        <h3>📞 Get Real Phone Call Reminders</h3>
+        <p>Upgrade to Premium — we will call your phone and remind you to take your medicine in your language!</p>
+      </div>
+      <button class="btn-premium" onclick="showPremiumPopup()">Upgrade ₹99/month</button>
+    </div>
+
+    <div class="voice-status">
+      <div class="voice-dot"></div>
+      <strong>🔊 Voice Reminders Active</strong> &nbsp;— Keep this page open. Your alarm will go off automatically at the times you set and speak out loud!
+    </div>
+
+    {% if reminders %}
+      <div class="reminders-grid">
+        {% for reminder in reminders %}
+          <div class="reminder-card {% if not reminder.is_active %}inactive{% endif %}">
+            <div class="reminder-top">
+              <div class="medicine-icon">💊</div>
+              <span class="active-badge {% if reminder.is_active %}active{% else %}inactive{% endif %}">
+                {% if reminder.is_active %}Active{% else %}Paused{% endif %}
+              </span>
+            </div>
+            <div class="medicine-name">{{ reminder.medicine_name }}</div>
+            <div class="medicine-dosage">{{ reminder.dosage }}</div>
+            <div class="reminder-times">
+              {% for t in reminder.reminder_times.split(',') %}
+                <span class="time-pill">⏰ {{ t.strip() }}</span>
+              {% endfor %}
+            </div>
+            <div class="reminder-meta">
+              <span>🔄 {{ reminder.frequency }}</span>
+              <span>📅 From: {{ reminder.start_date }}</span>
+              {% if reminder.end_date %}<span>📅 Until: {{ reminder.end_date }}</span>{% endif %}
+              <span>🌐 {{ reminder.language }}</span>
+            </div>
+            {% if reminder.notes %}
+              <div class="reminder-notes">📝 {{ reminder.notes }}</div>
+            {% endif %}
+            <div class="reminder-footer">
+              <button class="btn-speak" onclick="speakNow('{{ reminder.medicine_name }}', '{{ reminder.dosage }}', '{{ reminder.language }}')">🔊 Test Voice</button>
+              {% if reminder.is_active %}
+                <a href="/reminders/toggle/{{ reminder.id }}" class="btn-toggle-on">⏸ Pause</a>
+              {% else %}
+                <a href="/reminders/toggle/{{ reminder.id }}" class="btn-toggle-off">▶️ Resume</a>
+              {% endif %}
+              <a href="/reminders/delete/{{ reminder.id }}" class="btn-delete" onclick="return confirm('Delete this reminder?')">🗑</a>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty-state">
+        <div class="empty-icon">💊</div>
+        <h3>No reminders yet</h3>
+        <p>Add your first medicine reminder to get started</p>
+        <a href="/reminders/add" class="btn btn-primary">+ Add First Reminder</a>
+      </div>
+    {% endif %}
+  {% else %}
+    <div class="empty-state">
+      <div class="empty-icon">💊</div>
+      <h3>Login to view your reminders</h3>
+      <p>Please login to manage your medicine reminders and schedule alerts.</p>
+      <a href="/login" class="btn btn-primary">Login Now</a>
+    </div>
+  {% endif %}
+</div>
+
+<!-- Alarm Popup -->
+<div class="alarm-popup" id="alarmPopup">
+  <div class="alarm-box">
+    <div class="alarm-icon">🔔</div>
+    <div class="alarm-title" id="alarmTitle">మందు సమయం!</div>
+    <div class="alarm-medicine" id="alarmMedicine"></div>
+    <div class="alarm-dosage" id="alarmDosage"></div>
+    <div class="alarm-message" id="alarmMessage"></div>
+    <button class="btn-dismiss" onclick="dismissAlarm()">✅ తీసుకున్నాను / Done</button>
+    <button class="btn-snooze" onclick="snoozeAlarm()">⏰ 5 నిమిషాల్లో గుర్తు చేయి (Snooze 5 min)</button>
+  </div>
+</div>
+
+<script>
+const reminders = [
+  {% for reminder in reminders %}
+  {% if reminder.is_active %}
+  {
+    name: "{{ reminder.medicine_name }}",
+    dosage: "{{ reminder.dosage }}",
+    times: "{{ reminder.reminder_times }}".split(",").map(t => t.trim()),
+    language: "{{ reminder.language }}"
+  },
+  {% endif %}
+  {% endfor %}
+];
+
+let currentReminder = null;
+let snoozeTimeout = null;
+let alreadyAlerted = {};
+
+function getAlarmText(medicine, dosage, lang) {
+  const texts = {
+    'te-IN': `మీ మందు తీసుకోవడానికి సమయం అయింది. ${medicine}, ${dosage} తీసుకోండి. మీ ఆరోగ్యం బాగుండాలని కోరుకుంటున్నాను.`,
+    'hi-IN': `आपकी दवाई लेने का समय हो गया है। कृपया ${medicine}, ${dosage} लीजिए। आपका स्वास्थ्य अच्छा रहे।`,
+    'en-IN': `It is time to take your medicine. Please take ${medicine}, ${dosage}. Take care of your health.`,
+    'en-US': `It is time to take your medicine. Please take ${medicine}, ${dosage}. Stay healthy.`,
+    'ta-IN': `உங்கள் மருந்து எடுக்கும் நேரம் வந்தது. ${medicine}, ${dosage} எடுத்துக்கொள்ளுங்கள்.`,
+    'kn-IN': `ನಿಮ್ಮ ಔಷಧಿ ತೆಗೆದುಕೊಳ್ಳುವ ಸಮಯ ಬಂದಿದೆ. ${medicine}, ${dosage} ತೆಗೆದುಕೊಳ್ಳಿ.`,
+    'ml-IN': `നിങ്ങളുടെ മരുന്ന് കഴിക്കാനുള്ള സമയമായി. ${medicine}, ${dosage} കഴിക്കുക.`
+  };
+  return texts[lang] || texts['en-IN'];
+}
+
+function getTitleText(lang) {
+  const titles = {
+    'te-IN': 'మందు సమయం! 💊',
+    'hi-IN': 'दवाई का समय! 💊',
+    'en-IN': 'Medicine Time! 💊',
+    'en-US': 'Medicine Time! 💊',
+    'ta-IN': 'மருந்து நேரம்! 💊',
+    'kn-IN': 'ಔಷಧಿ ಸಮಯ! 💊',
+    'ml-IN': 'മരുന്ന് സമയം! 💊'
+  };
+  return titles[lang] || titles['en-IN'];
+}
+
+function speakNow(medicine, dosage, lang) {
+  const text = getAlarmText(medicine, dosage, lang);
+  window.speechSynthesis.cancel();
+  const msg = new SpeechSynthesisUtterance(text);
+  msg.lang = lang;
+  msg.rate = 0.85;
+  msg.pitch = 1.1;
+  msg.volume = 1;
+
+  const voices = window.speechSynthesis.getVoices();
+  const femaleVoice = voices.find(v =>
+    v.lang === lang && (v.name.toLowerCase().includes('female') || v.name.toLowerCase().includes('woman') || v.name.toLowerCase().includes('zira') || v.name.toLowerCase().includes('heera') || v.name.toLowerCase().includes('priya'))
+  ) || voices.find(v => v.lang === lang) || voices.find(v => v.lang.startsWith(lang.split('-')[0]));
+
+  if (femaleVoice) msg.voice = femaleVoice;
+  window.speechSynthesis.speak(msg);
+}
+
+function showAlarm(reminder) {
+  currentReminder = reminder;
+  playAlarmSound();
+
+  document.getElementById('alarmTitle').textContent = getTitleText(reminder.language);
+  document.getElementById('alarmMedicine').textContent = '💊 ' + reminder.name;
+  document.getElementById('alarmDosage').textContent = reminder.dosage;
+  document.getElementById('alarmMessage').textContent = getAlarmText(reminder.name, reminder.dosage, reminder.language);
+  document.getElementById('alarmPopup').classList.add('show');
+
+  setTimeout(() => speakNow(reminder.name, reminder.dosage, reminder.language), 500);
+}
+
+function dismissAlarm() {
+  document.getElementById('alarmPopup').classList.remove('show');
+  window.speechSynthesis.cancel();
+  if (snoozeTimeout) clearTimeout(snoozeTimeout);
+}
+
+function snoozeAlarm() {
+  document.getElementById('alarmPopup').classList.remove('show');
+  window.speechSynthesis.cancel();
+  if (currentReminder) {
+    snoozeTimeout = setTimeout(() => showAlarm(currentReminder), 5 * 60 * 1000);
+  }
+}
+
+function playAlarmSound() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    for (let i = 0; i < 4; i++) {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.frequency.value = i % 2 === 0 ? 880 : 660;
+      osc.type = 'sine';
+      gain.gain.setValueAtTime(0.4, ctx.currentTime + i * 0.4);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.4 + 0.35);
+      osc.start(ctx.currentTime + i * 0.4);
+      osc.stop(ctx.currentTime + i * 0.4 + 0.35);
+    }
+  } catch(e) {}
+}
+
+function checkReminders() {
+  const now = new Date();
+  const currentTime = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
+  const key = currentTime;
+
+  reminders.forEach(r => {
+    r.times.forEach(t => {
+      const alertKey = r.name + '_' + t;
+      if (t === currentTime && !alreadyAlerted[alertKey]) {
+        alreadyAlerted[alertKey] = true;
+        showAlarm(r);
+        setTimeout(() => { delete alreadyAlerted[alertKey]; }, 60000);
+      }
+    });
+  });
+}
+
+window.speechSynthesis.onvoiceschanged = () => { window.speechSynthesis.getVoices(); };
+setInterval(checkReminders, 10000);
+checkReminders();
+
+function showPremiumPopup() {
+  alert('📞 Premium Feature\n\nUpgrade to Premium for ₹99/month to get:\n✅ Real phone calls in your language\n✅ SMS reminders\n✅ Family notifications\n\nComing soon! We will notify you when it launches.');
+}
+</script>
+{% endblock %}

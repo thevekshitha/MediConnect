@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+{% block title %}Add Reminder — MediConnect{% endblock %}
+
+{% block extra_styles %}
+.add-reminder-page { padding: 48px 64px; max-width: 800px; margin: 0 auto; }
+.page-header { margin-bottom: 40px; }
+.page-header h1 { font-family: 'Fraunces', serif; font-size: 2rem; font-weight: 600; color: var(--text-dark); }
+.page-header p { color: var(--text-light); font-size: 0.9rem; margin-top: 4px; }
+.form-card { background: white; border: 1px solid var(--border); border-radius: var(--radius); padding: 40px; }
+.form-stack { display: flex; flex-direction: column; gap: 20px; margin-bottom: 28px; }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.form-group select {
+  padding: 12px 16px; border: 1.5px solid var(--border); border-radius: 10px;
+  font-family: 'DM Sans', sans-serif; font-size: 0.95rem;
+  color: var(--text-dark); background: var(--off-white);
+  transition: all 0.2s; outline: none; width: 100%;
+}
+.form-group select:focus { border-color: var(--green-mid); background: white; box-shadow: 0 0 0 3px rgba(45,122,79,0.1); }
+.form-group textarea {
+  padding: 12px 16px; border: 1.5px solid var(--border); border-radius: 10px;
+  font-family: 'DM Sans', sans-serif; font-size: 0.95rem;
+  color: var(--text-dark); background: var(--off-white);
+  transition: all 0.2s; outline: none; width: 100%;
+  resize: vertical; min-height: 100px;
+}
+.form-group textarea:focus { border-color: var(--green-mid); background: white; box-shadow: 0 0 0 3px rgba(45,122,79,0.1); }
+.times-list { display: flex; flex-direction: column; gap: 10px; margin-top: 8px; }
+.time-row { display: flex; align-items: center; gap: 10px; }
+.time-row input[type="time"] {
+  padding: 10px 14px; border: 1.5px solid var(--border); border-radius: 10px;
+  font-family: 'DM Sans', sans-serif; font-size: 0.95rem;
+  color: var(--text-dark); background: var(--off-white);
+  outline: none; transition: all 0.2s; flex: 1;
+}
+.time-row input[type="time"]:focus { border-color: var(--green-mid); background: white; box-shadow: 0 0 0 3px rgba(45,122,79,0.1); }
+.btn-add-time { background: var(--green-pale); color: var(--green-dark); border: 1px solid var(--border); padding: 10px 16px; border-radius: 10px; font-size: 0.88rem; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
+.btn-add-time:hover { background: var(--green-mid); color: white; }
+.btn-remove-time { background: #fde8e8; color: #a32d2d; border: none; padding: 8px 12px; border-radius: 8px; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; }
+.btn-remove-time:hover { background: #f5b8b8; }
+.form-actions { display: flex; gap: 14px; }
+{% endblock %}
+
+{% block content %}
+<div class="add-reminder-page">
+  <div class="page-header">
+    <h1>Add Medicine Reminder</h1>
+    <p>Set up a reminder so you never miss a dose</p>
+  </div>
+
+  <div class="form-card">
+    <form method="POST">
+      <div class="form-stack">
+
+        <div class="form-group">
+          <label>Medicine Name</label>
+          <input type="text" name="medicine_name" placeholder="e.g. Paracetamol, Metformin, Vitamin D" required />
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Dosage</label>
+            <input type="text" name="dosage" placeholder="e.g. 500mg, 1 tablet" required />
+          </div>
+          <div class="form-group">
+            <label>Frequency</label>
+            <select name="frequency" required>
+              <option value="" disabled selected>Select frequency</option>
+              <option value="Once daily">Once daily</option>
+              <option value="Twice daily">Twice daily</option>
+              <option value="Three times daily">Three times daily</option>
+              <option value="Four times daily">Four times daily</option>
+              <option value="Every alternate day">Every alternate day</option>
+              <option value="Once a week">Once a week</option>
+              <option value="As needed">As needed</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Reminder Language</label>
+          <select name="language">
+            <option value="te-IN">Telugu</option>
+            <option value="hi-IN">Hindi</option>
+            <option value="en-IN">English (Indian)</option>
+            <option value="en-US">English (US)</option>
+            <option value="ta-IN">Tamil</option>
+            <option value="kn-IN">Kannada</option>
+            <option value="ml-IN">Malayalam</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Reminder Times</label>
+          <div class="times-list" id="timesList">
+            <div class="time-row">
+              <input type="time" name="reminder_times" required />
+              <button type="button" class="btn-remove-time" onclick="removeTime(this)">✕ Remove</button>
+            </div>
+          </div>
+          <button type="button" class="btn-add-time" style="margin-top:10px;" onclick="addTime()">+ Add Another Time</button>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Start Date</label>
+            <input type="date" name="start_date" required />
+          </div>
+          <div class="form-group">
+            <label>End Date <span style="color:var(--text-light); font-weight:400;">(optional)</span></label>
+            <input type="date" name="end_date" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Notes <span style="color:var(--text-light); font-weight:400;">(optional)</span></label>
+          <textarea name="notes" placeholder="e.g. Take after meals, Avoid dairy products..."></textarea>
+        </div>
+
+      </div>
+
+      <div class="form-actions">
+        <a href="/reminders" class="btn btn-outline">Cancel</a>
+        <button type="submit" class="btn btn-primary" style="flex:1;">Save Reminder →</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+function addTime() {
+  const list = document.getElementById('timesList');
+  const row = document.createElement('div');
+  row.className = 'time-row';
+  row.innerHTML = `
+    <input type="time" name="reminder_times" required />
+    <button type="button" class="btn-remove-time" onclick="removeTime(this)">✕ Remove</button>
+  `;
+  list.appendChild(row);
+}
+
+function removeTime(btn) {
+  const rows = document.querySelectorAll('.time-row');
+  if (rows.length > 1) {
+    btn.parentElement.remove();
+  } else {
+    alert('At least one reminder time is required!');
+  }
+}
+</script>
+{% endblock %}

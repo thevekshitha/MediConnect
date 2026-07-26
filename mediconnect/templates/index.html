@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+{% block title %}MediConnect — Your Digital Health Companion{% endblock %}
+
+{% block extra_styles %}
+.hero {
+  min-height: calc(100vh - 68px);
+  display: grid; grid-template-columns: 1fr 1fr;
+  align-items: center; padding: 80px; gap: 60px; position: relative;
+}
+.hero::before {
+  content: ''; position: absolute; top: -100px; right: -100px;
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(76,175,120,0.12) 0%, transparent 70%);
+  border-radius: 50%; pointer-events: none;
+}
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 6px 16px; background: var(--green-pale);
+  border: 1px solid var(--border); border-radius: 50px;
+  font-size: 0.8rem; font-weight: 500; color: var(--green-mid); margin-bottom: 24px;
+}
+.hero-badge span {
+  width: 6px; height: 6px; background: var(--green-accent);
+  border-radius: 50%; animation: pulse 2s infinite;
+}
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+.hero-title {
+  font-family: 'Fraunces', serif; font-size: 3.5rem;
+  font-weight: 600; line-height: 1.15; color: var(--text-dark); margin-bottom: 20px;
+}
+.hero-title em { font-style: italic; color: var(--green-mid); }
+.hero-desc { font-size: 1.05rem; color: var(--text-light); line-height: 1.7; margin-bottom: 36px; }
+.hero-actions { display: flex; gap: 14px; flex-wrap: wrap; }
+.hero-stats {
+  display: flex; gap: 32px; margin-top: 52px;
+  padding-top: 32px; border-top: 1px solid var(--border);
+}
+.stat-num { font-family: 'Fraunces', serif; font-size: 1.8rem; font-weight: 600; color: var(--green-dark); }
+.stat-label { font-size: 0.78rem; color: var(--text-light); font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; }
+.hero-visual { display: flex; flex-direction: column; gap: 16px; animation: fadeUp 0.8s ease both; animation-delay: 0.2s; }
+@keyframes fadeUp { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:translateY(0)} }
+.health-card {
+  background: white; border: 1px solid var(--border); border-radius: 16px;
+  padding: 20px 24px; box-shadow: var(--shadow);
+  display: flex; align-items: center; gap: 16px; transition: transform 0.2s;
+  text-decoration: none;
+  color: inherit;
+}
+.health-card:hover { transform: translateY(-2px); }
+.health-card, .health-card * {
+  text-decoration: none;
+}
+.card-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+.card-icon.green { background: var(--green-pale); }
+.card-icon.blue  { background: #e8f0fe; }
+.card-icon.amber { background: #fef3e2; }
+.card-text h4 { font-size: 0.95rem; font-weight: 500; color: var(--text-dark); }
+.card-text p  { font-size: 0.82rem; color: var(--text-light); margin-top: 2px; }
+.card-badge { margin-left: auto; padding: 4px 10px; border-radius: 50px; font-size: 0.75rem; font-weight: 500; }
+.card-badge.online { background: #d4f0e0; color: #1a4a2e; }
+.card-badge.active { background: #e8f0fe; color: #1a3a7a; }
+.register-section {
+  padding: 60px 80px;
+  background: white;
+  border-top: 1px solid var(--border);
+}
+.register-section h2 { font-family: 'Fraunces', serif; font-size: 2rem; font-weight: 600; color: var(--text-dark); margin-bottom: 12px; text-align: center; }
+.register-section p { color: var(--text-light); text-align: center; margin-bottom: 40px; }
+.register-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; max-width: 800px; margin: 0 auto; }
+.register-card { padding: 36px; border: 1px solid var(--border); border-radius: var(--radius); text-align: center; transition: all 0.2s; }
+.register-card:hover { border-color: var(--green-light); box-shadow: var(--shadow); transform: translateY(-3px); }
+.register-card-icon { font-size: 48px; margin-bottom: 16px; }
+.register-card h3 { font-family: 'Fraunces', serif; font-size: 1.3rem; font-weight: 600; color: var(--text-dark); margin-bottom: 8px; }
+.register-card p { font-size: 0.88rem; color: var(--text-light); line-height: 1.6; margin-bottom: 24px; }
+.features { padding: 80px; background: var(--off-white); border-top: 1px solid var(--border); }
+.section-label { font-size: 0.78rem; font-weight: 500; color: var(--green-mid); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px; }
+.section-title { font-family: 'Fraunces', serif; font-size: 2.4rem; font-weight: 600; color: var(--text-dark); margin-bottom: 48px; }
+.features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+.feature-card { padding: 28px; border: 1px solid var(--border); border-radius: var(--radius); transition: all 0.2s; background: white; }
+.feature-card:hover { border-color: var(--green-light); box-shadow: var(--shadow); transform: translateY(-3px); }
+.feature-icon { width: 52px; height: 52px; background: var(--green-pale); border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 18px; }
+.feature-card h3 { font-size: 1rem; font-weight: 500; color: var(--text-dark); margin-bottom: 8px; }
+.feature-card p  { font-size: 0.88rem; color: var(--text-light); line-height: 1.6; }
+.cta-section {
+  margin: 0 80px 80px; background: var(--green-dark);
+  border-radius: 24px; padding: 60px;
+  display: flex; align-items: center; justify-content: space-between; gap: 40px;
+}
+.cta-section h2 { font-family: 'Fraunces', serif; font-size: 2rem; color: white; font-weight: 600; line-height: 1.3; }
+.cta-section p { color: rgba(255,255,255,0.65); font-size: 0.9rem; margin-top: 10px; }
+.btn-white { background: white; color: var(--green-dark); padding: 14px 36px; border-radius: 50px; font-weight: 500; font-size: 0.95rem; text-decoration: none; transition: all 0.2s; white-space: nowrap; }
+.btn-white:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.2); }
+{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <div style="animation: fadeUp 0.6s ease both;">
+    <div class="hero-badge"><span></span> Trusted Digital Health Platform</div>
+    <h1 class="hero-title">Your health,<br><em>managed smartly</em><br>from anywhere.</h1>
+    <p class="hero-desc">Store your medical history, consult specialist doctors online, track your medications, and never miss an appointment — all in one place.</p>
+    <div class="hero-actions">
+      <a href="/register" class="btn btn-primary">🧑‍⚕️ Register as Patient</a>
+      <a href="/doctor/register" class="btn btn-outline">👨‍⚕️ Register as Doctor</a>
+    </div>
+    <div class="hero-stats">
+      <div><div class="stat-num">50+</div><div class="stat-label">Specialists</div></div>
+      <div><div class="stat-num">24/7</div><div class="stat-label">Available</div></div>
+      <div><div class="stat-num">100%</div><div class="stat-label">Secure</div></div>
+    </div>
+  </div>
+  <div class="hero-visual">
+    <a href="/doctors" class="health-card"><div class="card-icon green">🩺</div><div class="card-text"><h4>Dr. Priya Sharma</h4><p>Cardiologist · Available now</p></div><span class="card-badge online">Online</span></a>
+    <a href="/reminders" class="health-card"><div class="card-icon amber">💊</div><div class="card-text"><h4>Medicine Reminder</h4><p>Metformin 500mg · 8:00 AM today</p></div><span class="card-badge active">Pending</span></a>
+    <a href="/records" class="health-card"><div class="card-icon blue">📋</div><div class="card-text"><h4>Medical Records</h4><p>Last updated 2 days ago</p></div><span class="card-badge online">Synced</span></a>
+    <a href="/symptom-checker" class="health-card"><div class="card-icon green">🔍</div><div class="card-text"><h4>Symptom Checker</h4><p>AI-powered health analysis</p></div><span class="card-badge active">Try Now</span></a>
+  </div>
+</section>
+
+<!-- Register Section -->
+<section class="register-section">
+  <h2>Join MediConnect Today</h2>
+  <p>Choose how you want to get started</p>
+  <div class="register-cards">
+    <div class="register-card">
+      <div class="register-card-icon">🧑‍⚕️</div>
+      <h3>I am a Patient</h3>
+      <p>Store your medical records, consult doctors online, track medicines and appointments from one place.</p>
+      <a href="/register" class="btn btn-primary" style="width:100%;">Register as Patient</a>
+    </div>
+    <div class="register-card">
+      <div class="register-card-icon">👨‍⚕️</div>
+      <h3>I am a Doctor</h3>
+      <p>Manage your appointments, consult patients online, set your availability and consultation fees.</p>
+      <a href="/doctor/register" class="btn btn-outline" style="width:100%;">Register as Doctor</a>
+    </div>
+  </div>
+</section>
+
+<section class="features">
+  <p class="section-label">What we offer</p>
+  <h2 class="section-title">Everything you need for your health</h2>
+  <div class="features-grid">
+    <div class="feature-card"><div class="feature-icon">📁</div><h3>Medical History</h3><p>Store and access all your health records, prescriptions, and test results securely.</p></div>
+    <div class="feature-card"><div class="feature-icon">🔬</div><h3>Symptom Checker</h3><p>Describe your symptoms and get instant suggestions about possible conditions.</p></div>
+    <div class="feature-card"><div class="feature-icon">👨‍⚕️</div><h3>Online Consultations</h3><p>Connect with specialist doctors from home. Affordable consultations, some even free.</p></div>
+    <div class="feature-card"><div class="feature-icon">🗓️</div><h3>Appointment Booking</h3><p>Book and manage appointments with doctors easily. Get reminders so you never miss one.</p></div>
+    <div class="feature-card"><div class="feature-icon">⏰</div><h3>Medicine Reminders</h3><p>Set reminders for your medications. Voice alarm in your language at your chosen time.</p></div>
+    <div class="feature-card"><div class="feature-icon">🔒</div><h3>Secure & Private</h3><p>Your health data is fully encrypted and only accessible by you and your chosen doctors.</p></div>
+  </div>
+</section>
+
+<div class="cta-section">
+  <div>
+    <h2>Start managing your health smarter today.</h2>
+    <p>Free to join. No credit card needed.</p>
+  </div>
+  <a href="/register" class="btn-white">Create Free Account →</a>
+</div>
+{% endblock %}
