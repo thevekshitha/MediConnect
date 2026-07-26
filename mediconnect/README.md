@@ -1,92 +1,103 @@
-# MediConnect — Setup Guide
+# 🩺 MediConnect
 
-A full-stack health management web app built with Flask.
-
----
-
-## Features
-- Patient registration & login
-- Medical records (add, view, delete, file upload)
-- Doctor directory with appointment booking
-- Doctor dashboard (accept/reject appointments, view patients)
-- Medicine reminders with voice alarms (7 Indian languages)
-- AI-powered Symptom Checker (via Anthropic Claude API)
+An AI-powered healthcare management platform built using Flask that enables patients and doctors to manage appointments, medical records, reminders, and health services from one platform.
 
 ---
 
-## Quick Start
+## 🚀 Features
 
-### 1. Install dependencies
+### 👤 Patient
+- Register & Login
+- Update Profile
+- Upload Medical Records
+- Book Doctor Appointments
+- Medicine Reminders
+- AI Symptom Checker
+
+### 👨‍⚕️ Doctor
+- Register & Login
+- Manage Dashboard
+- View Appointments
+- Update Profile
+
+### 🤖 AI
+- AI-powered Symptom Analysis
+
+---
+
+## 🛠 Tech Stack
+
+Backend
+- Flask
+- SQLAlchemy
+- SQLite
+
+Frontend
+- HTML
+- CSS
+- JavaScript
+- Jinja2
+
+Others
+- Python
+- Bootstrap
+- Git
+- GitHub
+
+---
+
+## 📂 Project Structure
+
+```
+MediConnect/
+│
+├── mediconnect/
+│   ├── templates/
+│   ├── uploads/
+│   └── app.py
+│
+├── instance/
+├── requirements.txt
+├── README.md
+└── .gitignore
+```
+
+---
+
+## ⚙️ Installation
+
 ```bash
+git clone https://github.com/thevekshitha/MediConnect.git
+
+cd MediConnect
+
 pip install -r requirements.txt
-```
 
-### 2. Set your Anthropic API key (for Symptom Checker)
-```bash
-# Linux / Mac
-export ANTHROPIC_API_KEY=sk-ant-your-key-here
-
-# Windows
-set ANTHROPIC_API_KEY=sk-ant-your-key-here
-```
-> Get a free API key at https://console.anthropic.com
-> The Symptom Checker falls back to local rule-based analysis if no key is set.
-
-### 3. Run the app
-```bash
 python app.py
 ```
 
-### 4. Open in browser
-```
-http://127.0.0.1:5000
-```
+---
+
+## 📸 Screenshots
+
+Coming Soon
 
 ---
 
-## Demo Doctor Logins
-Six demo doctors are auto-created on first run. Password for all: `doctor123`
+## 📈 Future Improvements
 
-| Doctor | Email | Specialization |
-|--------|-------|----------------|
-| Dr. Priya Sharma | priya@mediconnect.com | Cardiologist |
-| Dr. Ravi Kumar | ravi@mediconnect.com | General Physician |
-| Dr. Anita Reddy | anita@mediconnect.com | Dermatologist |
-| Dr. Suresh Patel | suresh@mediconnect.com | Orthopedic |
-| Dr. Meena Nair | meena@mediconnect.com | Pediatrician |
-| Dr. Arun Joshi | arun@mediconnect.com | Psychiatrist |
+- AI Chatbot
+- Email Notifications
+- OTP Authentication
+- Video Consultation
+- Doctor Search Filters
+- Cloud Deployment
 
 ---
 
-## Project Structure
-```
-mediconnect/
-├── app.py               ← Flask app (routes, models, API)
-├── requirements.txt     ← Python dependencies
-├── README.md
-├── uploads/             ← Uploaded medical files (auto-created)
-└── templates/
-    ├── base.html
-    ├── index.html
-    ├── login.html
-    ├── register.html
-    ├── dashboard.html
-    ├── record.html
-    ├── add_record.html
-    ├── doctors.html
-    ├── book_appointment.html
-    ├── reminders.html
-    ├── add_reminder.html
-    ├── symptoms_checker.html
-    ├── doctor_login.html
-    ├── doctor_register.html
-    ├── doctor_dashboard.html
-    └── doctor_update.html
-```
+## 👩‍💻 Author
 
----
+**Vekshitha Kutagulla**
 
-## Notes
-- Database: SQLite (`mediconnect.db`) — auto-created on first run
-- File uploads stored in `uploads/` folder (PDF, JPG, PNG up to 16MB)
-- Voice reminders use the browser's Web Speech API — keep the reminders page open
+GitHub:
+https://github.com/thevekshitha
