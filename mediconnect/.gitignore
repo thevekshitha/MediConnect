@@ -1,6 +1,5 @@
-# Python
-__pycache__/
-*.py[cod]
+# Database
+*.db
 *.sqlite3
 
 # Virtual Environment
@@ -14,9 +13,14 @@ venv/
 # Uploads
 uploads/
 
+# Database folder
+instance/
+
 # VS Code
 .vscode/
 
 # OS Files
 .DS_Store
 Thumbs.db
+__pycache__/
+*.pyc
