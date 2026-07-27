@@ -161,6 +161,18 @@
       border-color: var(--green-mid); background: white;
       box-shadow: 0 0 0 3px rgba(45,122,79,0.1);
     }
+    .password-field { position: relative; }
+    .password-field input { width: 100%; padding-right: 44px; }
+    .password-toggle {
+      position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+      width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;
+      border: none; background: transparent; cursor: pointer; color: var(--text-light); padding: 0;
+    }
+    .password-toggle:hover { color: var(--green-mid); }
+    .password-toggle svg {
+      width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.8;
+      stroke-linecap: round; stroke-linejoin: round;
+    }
     .page { padding-top: 68px; min-height: 100vh; }
     {% block extra_styles %}{% endblock %}
   </style>
@@ -236,7 +248,30 @@
       });
     }, 3500);
 
+    function togglePasswordVisibility(button) {
+      const field = button.closest('.password-field');
+      const input = field?.querySelector('input');
+      if (!input) return;
+
+      const isPassword = input.type === 'password';
+      input.type = isPassword ? 'text' : 'password';
+      button.setAttribute('aria-label', isPassword ? 'Hide password' : 'Show password');
+      const icon = button.querySelector('svg');
+      if (icon) {
+        icon.innerHTML = isPassword
+          ? '<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"></path><circle cx="12" cy="12" r="3"></circle>'
+          : '<path d="M3 3l18 18"></path><path d="M10.6 10.6A3 3 0 0 0 13.4 13.4"></path><path d="M9.2 4.8A10.9 10.9 0 0 1 12 4c6.5 0 10 8 10 8a19.4 19.4 0 0 1-4.1 5.2"></path><path d="M6.3 6.3A18.7 18.7 0 0 0 2 12s3.5 7 10 7a10.8 10.8 0 0 0 4.9-1.2"></path>';
+      }
+    }
+
     document.addEventListener('click', (event) => {
+      const toggleButton = event.target.closest('[data-password-toggle]');
+      if (toggleButton) {
+        event.preventDefault();
+        togglePasswordVisibility(toggleButton);
+        return;
+      }
+
       document.querySelectorAll('.dropdown').forEach(dropdown => {
         if (!dropdown.contains(event.target)) {
           dropdown.classList.remove('open');
