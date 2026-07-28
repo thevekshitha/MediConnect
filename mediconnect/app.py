@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, session, f
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import func
+from sqlalchemy import func, text
 from datetime import datetime
 import os
 import json
@@ -43,6 +43,11 @@ class Doctor(db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(200), nullable=False)
     specialization = db.Column(db.String(100), nullable=False)
+    medical_registration_number = db.Column(db.String(100))
+    qualification = db.Column(db.String(150))
+    years_of_experience = db.Column(db.Integer)
+    consultation_fee = db.Column(db.Float, default=0.0)
+    languages_spoken = db.Column(db.String(200))
     experience = db.Column(db.Integer)
     fee = db.Column(db.Float, default=0.0)
     availability = db.Column(db.String(200), default="Mon-Fri, 9am-5pm")
@@ -100,6 +105,27 @@ class MedicineReminder(db.Model):
 
 
 # ─────────────────────────────────────────────
+# DATABASE HELPERS
+# ─────────────────────────────────────────────
+
+def ensure_doctor_columns():
+    inspector = db.inspect(db.engine)
+    existing_columns = {column["name"] for column in inspector.get_columns("doctor")}
+
+    with db.engine.begin() as connection:
+        if "medical_registration_number" not in existing_columns:
+            connection.execute(text("ALTER TABLE doctor ADD COLUMN medical_registration_number VARCHAR(100)"))
+        if "qualification" not in existing_columns:
+            connection.execute(text("ALTER TABLE doctor ADD COLUMN qualification VARCHAR(150)"))
+        if "years_of_experience" not in existing_columns:
+            connection.execute(text("ALTER TABLE doctor ADD COLUMN years_of_experience INTEGER"))
+        if "consultation_fee" not in existing_columns:
+            connection.execute(text("ALTER TABLE doctor ADD COLUMN consultation_fee FLOAT"))
+        if "languages_spoken" not in existing_columns:
+            connection.execute(text("ALTER TABLE doctor ADD COLUMN languages_spoken VARCHAR(200)"))
+
+
+# ─────────────────────────────────────────────
 # SEED DEMO DOCTORS
 # ─────────────────────────────────────────────
 
@@ -109,31 +135,43 @@ def seed_demo_doctors():
             Doctor(name="Priya Sharma", email="priya@mediconnect.com",
                    password=generate_password_hash("doctor123"),
                    specialization="Cardiologist", experience=12, fee=800,
+                   medical_registration_number="MRN-001", qualification="MBBS, MD",
+                   years_of_experience=12, consultation_fee=800, languages_spoken="English, Hindi",
                    availability="Mon-Sat, 9am-6pm",
                    about="Expert in cardiovascular diseases with 12 years at Apollo Hospital."),
             Doctor(name="Ravi Kumar", email="ravi@mediconnect.com",
                    password=generate_password_hash("doctor123"),
                    specialization="General Physician", experience=8, fee=300,
+                   medical_registration_number="MRN-002", qualification="MBBS, DNB",
+                   years_of_experience=8, consultation_fee=300, languages_spoken="English, Telugu",
                    availability="Mon-Fri, 10am-7pm",
                    about="Experienced general physician specialising in chronic disease management."),
             Doctor(name="Anita Reddy", email="anita@mediconnect.com",
                    password=generate_password_hash("doctor123"),
                    specialization="Dermatologist", experience=6, fee=600,
+                   medical_registration_number="MRN-003", qualification="MBBS, MD",
+                   years_of_experience=6, consultation_fee=600, languages_spoken="English, Kannada",
                    availability="Tue-Sun, 11am-5pm",
                    about="Skin specialist with expertise in acne, eczema, and cosmetic dermatology."),
             Doctor(name="Suresh Patel", email="suresh@mediconnect.com",
                    password=generate_password_hash("doctor123"),
                    specialization="Orthopedic", experience=15, fee=900,
+                   medical_registration_number="MRN-004", qualification="MBBS, MS",
+                   years_of_experience=15, consultation_fee=900, languages_spoken="English, Gujarati",
                    availability="Mon-Fri, 9am-4pm",
                    about="Senior orthopedic surgeon specialising in joint replacement and sports injuries."),
             Doctor(name="Meena Nair", email="meena@mediconnect.com",
                    password=generate_password_hash("doctor123"),
                    specialization="Pediatrician", experience=10, fee=400,
+                   medical_registration_number="MRN-005", qualification="MBBS, DCH",
+                   years_of_experience=10, consultation_fee=400, languages_spoken="English, Malayalam",
                    availability="Mon-Sat, 8am-6pm",
                    about="Child health specialist with a gentle approach and expertise in vaccinations."),
             Doctor(name="Arun Joshi", email="arun@mediconnect.com",
                    password=generate_password_hash("doctor123"),
                    specialization="Psychiatrist", experience=9, fee=700,
+                   medical_registration_number="MRN-006", qualification="MBBS, MD",
+                   years_of_experience=9, consultation_fee=700, languages_spoken="English, Hindi",
                    availability="Tue-Sat, 2pm-8pm",
                    about="Mental health specialist providing therapy and medication management."),
         ]
@@ -669,18 +707,52 @@ def delete_doctor_account():
 @app.route("/doctor/register", methods=["GET", "POST"])
 def doctor_register():
     if request.method == "POST":
-        email = request.form["email"]
+        name = request.form.get("name", "").strip()
+        email = request.form.get("email", "").strip()
+        password = request.form.get("password", "").strip()
+        medical_registration_number = request.form.get("medical_registration_number", "").strip()
+        qualification = request.form.get("qualification", "").strip()
+        years_of_experience_value = request.form.get("years_of_experience", "").strip()
+        consultation_fee_value = request.form.get("consultation_fee", "").strip()
+        languages_spoken = request.form.get("languages_spoken", "").strip()
+        specialization = request.form.get("specialization", "").strip()
+        custom_specialization = request.form.get("custom_specialization", "").strip()
+
+        if not all([name, email, password, medical_registration_number, qualification, years_of_experience_value, consultation_fee_value, languages_spoken, specialization]):
+            flash("Please fill in all required fields.", "error")
+            return redirect(url_for("doctor_register"))
+
         if Doctor.query.filter_by(email=email).first():
             flash("Email already registered.", "error")
             return redirect(url_for("doctor_register"))
 
+        if specialization == "Other":
+            selected_specialization = custom_specialization
+            if not selected_specialization:
+                flash("Please enter your custom specialization.", "error")
+                return redirect(url_for("doctor_register"))
+        else:
+            selected_specialization = specialization
+
+        try:
+            experience_value = int(years_of_experience_value)
+            fee_value = float(consultation_fee_value)
+        except ValueError:
+            flash("Please enter valid numeric values for years of experience and consultation fee.", "error")
+            return redirect(url_for("doctor_register"))
+
         new_doctor = Doctor(
-            name=request.form["name"],
+            name=name,
             email=email,
-            password=generate_password_hash(request.form["password"]),
-            specialization=request.form["specialization"],
-            experience=int(request.form["experience"]),
-            fee=float(request.form["fee"]),
+            password=generate_password_hash(password),
+            specialization=selected_specialization,
+            medical_registration_number=medical_registration_number,
+            qualification=qualification,
+            years_of_experience=experience_value,
+            consultation_fee=fee_value,
+            languages_spoken=languages_spoken,
+            experience=experience_value,
+            fee=fee_value,
             about=request.form.get("about", "")
         )
         db.session.add(new_doctor)
@@ -794,6 +866,7 @@ def logout():
 # ─────────────────────────────────────────────
 with app.app_context():
     db.create_all()
+    ensure_doctor_columns()
     seed_demo_doctors()
 
 if __name__ == "__main__":

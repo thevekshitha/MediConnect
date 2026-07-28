@@ -72,6 +72,15 @@
               </button>
             </div>
           </div>
+          <div class="form-grid">
+            <div class="form-group"><label>Medical Registration Number</label><input type="text" name="medical_registration_number" placeholder="e.g. MRN-12345" required /></div>
+            <div class="form-group"><label>Qualification</label><input type="text" name="qualification" placeholder="e.g. MBBS, MD" required /></div>
+          </div>
+          <div class="form-grid">
+            <div class="form-group"><label>Years of Experience</label><input type="number" name="years_of_experience" placeholder="10" min="0" required /></div>
+            <div class="form-group"><label>Consultation Fee (₹)</label><input type="number" name="consultation_fee" placeholder="500" min="0" step="0.01" required /></div>
+          </div>
+          <div class="form-group"><label>Languages Spoken</label><input type="text" name="languages_spoken" placeholder="English, Hindi, Telugu" required /></div>
           <div class="form-group">
             <label>Specialization</label>
             <select name="specialization" required>
@@ -90,9 +99,9 @@
               <option value="Other">Other</option>
             </select>
           </div>
-          <div class="form-grid">
-            <div class="form-group"><label>Experience (years)</label><input type="number" name="experience" placeholder="5" min="0" required /></div>
-            <div class="form-group"><label>Consultation Fee (₹)</label><input type="number" name="fee" placeholder="500" min="0" required /></div>
+          <div class="form-group custom-specialization" id="custom-specialization-group">
+            <label>Custom Specialization</label>
+            <input type="text" name="custom_specialization" placeholder="Enter your specialization" />
           </div>
           <div class="form-group"><label>About You</label><textarea name="about" placeholder="Write a short bio about your expertise and experience..."></textarea></div>
         </div>
@@ -101,4 +110,25 @@
     </div>
   </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const specializationSelect = document.querySelector('select[name="specialization"]');
+  const customGroup = document.getElementById('custom-specialization-group');
+  const customInput = document.querySelector('input[name="custom_specialization"]');
+
+  const toggleCustomSpecialization = () => {
+    if (!specializationSelect || !customGroup || !customInput) return;
+    const showCustom = specializationSelect.value === 'Other';
+    customGroup.classList.toggle('show', showCustom);
+    customInput.required = showCustom;
+    if (!showCustom) {
+      customInput.value = '';
+    }
+  };
+
+  toggleCustomSpecialization();
+  specializationSelect?.addEventListener('change', toggleCustomSpecialization);
+});
+</script>
 {% endblock %}
